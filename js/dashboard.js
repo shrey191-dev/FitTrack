@@ -147,7 +147,7 @@ export async function renderDashboard() {
           ${avatarHtml(c, "card-avatar")}
           <h3 class="card-name">${esc(c.name)}</h3>
           <span class="chip goal-${goalSlug(c.goal)}">${esc(c.goal)}</span>
-          <p class="card-sessions"><strong>${sessions}</strong> ${sessions === 1 ? "session" : "sessions"}</p>
+          <p class="card-sessions"><strong>${String(sessions).padStart(2, "0")}</strong> ${sessions === 1 ? "session" : "sessions"} logged</p>
         </article>`;
     }).join("");
   }

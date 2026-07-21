@@ -1,28 +1,29 @@
-/* style.css — FitTrack
-   Athletic, glanceable UI for a trainer working on the gym floor (phone-first).
-   Display face: Barlow Semi Condensed (sports-jersey feel). Body: Inter.
-   Signature: goal color-coding across chips + card bars, and a fast tap-to-log
-   muscle-group selector. */
+/* style.css — FitTrack: "Iron"
+   Dark, sharp-edged, after-hours strength-room UI. Display face: Oswald
+   (industrial condensed). Body: Inter. Data face: JetBrains Mono — session
+   counts and dates read like a scoreboard, not a form field.
+   Signature: hazard-stripe card tops in goal color, square ID-badge avatars,
+   a flush seamed grid instead of floating shadowed cards. */
 
 :root {
-  --ink: #14181f;
-  --muted: #697180;
-  --page: #edf0f4;
-  --surface: #ffffff;
-  --line: #e2e6ec;
+  --ink: #eeeae2;
+  --muted: #9a9488;
+  --page: #1c1b1a;
+  --surface: #242322;
+  --surface-2: #2b2a28;
+  --line: #38362f;
 
-  --accent: #12995b;         /* emerald: "go / active / progress" */
-  --accent-strong: #0e7d4a;
-  --danger: #d84734;
+  --accent: #ff5a1f;        /* molten orange: "go / add / primary" */
+  --accent-strong: #e8480f;
+  --danger: #c73b2c;
 
-  --radius: 14px;
-  --shadow: 0 1px 2px rgba(20, 24, 31, .06), 0 6px 20px rgba(20, 24, 31, .06);
+  --radius: 3px;
 
   /* goal color coding */
-  --muscle-gain-bg: #ede7ff;  --muscle-gain-fg: #5b2bd6;  --muscle-gain-bar: #6d3fe0;
-  --fat-loss-bg:    #fff0da;  --fat-loss-fg:    #a9660a;  --fat-loss-bar:    #e8930e;
-  --strength-bg:    #fde3e1;  --strength-fg:    #bf3324;  --strength-bar:    #e04b3a;
-  --general-fitness-bg: #d8f2ef; --general-fitness-fg: #0c7a6f; --general-fitness-bar: #12a08f;
+  --muscle-gain-fg: #b79cff;      --muscle-gain-bar: #8b5cf6;
+  --fat-loss-fg:    #f0b429;      --fat-loss-bar:    #e8930e;
+  --strength-fg:    #ff8a75;      --strength-bar:    #e04b3a;
+  --general-fitness-fg: #5ad1c0;  --general-fitness-bar: #12a08f;
 }
 
 * { box-sizing: border-box; }
@@ -53,23 +54,23 @@ html, body {
 }
 
 .brand {
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 800;
-  font-size: 30px;
-  letter-spacing: -.02em;
+  font-family: "Oswald", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: -.01em;
   margin: 0;
   text-transform: uppercase;
 }
 .brand span { color: var(--accent); }
 
 .back {
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 18px;
+  font-family: "Oswald", sans-serif;
+  font-weight: 600;
+  font-size: 17px;
   text-decoration: none;
   color: var(--ink);
   text-transform: uppercase;
-  letter-spacing: .01em;
+  letter-spacing: .02em;
 }
 .back:hover { color: var(--accent); }
 
@@ -77,27 +78,27 @@ html, body {
 
 /* ---- buttons ------------------------------------------------------------ */
 .btn {
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 15px;
+  font-family: "Oswald", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
   text-transform: uppercase;
-  letter-spacing: .03em;
+  letter-spacing: .04em;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 10px 16px;
   cursor: pointer;
-  transition: transform .08s ease, background .15s ease, color .15s ease;
+  transition: background .12s ease, color .12s ease;
 }
 .btn:active { transform: translateY(1px); }
 
-.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary { background: var(--accent); color: #1c1b1a; }
 .btn-primary:hover { background: var(--accent-strong); }
 
 .btn-ghost { background: transparent; color: var(--muted); }
 .btn-ghost:hover { color: var(--ink); }
 
 .btn-danger-ghost { background: transparent; color: var(--danger); padding: 10px 12px; }
-.btn-danger-ghost:hover { background: #fdecea; }
+.btn-danger-ghost:hover { background: rgba(199, 59, 44, .15); }
 
 /* ---- search ------------------------------------------------------------- */
 .search { margin-bottom: 18px; }
@@ -107,131 +108,138 @@ html, body {
   font-size: 16px;
   font-family: inherit;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--surface);
   color: var(--ink);
 }
 .search input::placeholder { color: var(--muted); }
 
-/* ---- client grid -------------------------------------------------------- */
+/* ---- client grid: a seamed panel, not floating cards --------------------- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
 }
 
 .card {
   position: relative;
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 18px 16px 16px 20px;
-  box-shadow: var(--shadow);
+  padding: 22px 16px 16px;
   cursor: pointer;
   overflow: hidden;
-  transition: transform .1s ease, box-shadow .15s ease;
+  transition: background .12s ease;
 }
-.card:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(20,24,31,.12); }
+.card:hover { background: var(--surface-2); }
 
 .card-bar {
   position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 6px;
+  left: 0; right: 0; top: 0;
+  height: 4px;
   background: var(--muted);
 }
 .card-avatar {
   position: absolute;
-  top: 14px; right: 14px;
-  width: 40px; height: 40px;
-  border-radius: 50%;
+  top: 16px; right: 16px;
+  width: 36px; height: 36px;
+  border-radius: var(--radius);
   object-fit: cover;
-  border: 2px solid var(--surface);
-  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
 }
 .card-avatar-fallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 15px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 13px;
 }
 .card-name {
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 22px;
-  margin: 0 0 8px;
-  padding-right: 46px;
-  letter-spacing: -.01em;
+  font-family: "Oswald", sans-serif;
+  font-weight: 600;
+  font-size: 21px;
+  margin: 0 0 10px;
+  padding-right: 42px;
+  letter-spacing: -.005em;
 }
 .card-sessions {
-  margin: 12px 0 0;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
   color: var(--muted);
-  font-size: 14px;
+  font-size: 12px;
 }
 .card-sessions strong {
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-size: 30px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 21px;
   color: var(--ink);
-  line-height: 1;
-  margin-right: 4px;
+  margin-right: 5px;
 }
 
-/* ---- chips (goal) ------------------------------------------------------- */
+/* ---- goal tags (bracket style, no fill) ---------------------------------- */
 .chip {
   display: inline-block;
-  font-size: 12px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
   font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: #eef1f5;
-  color: var(--muted);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  background: transparent;
 }
 
-.goal-muscle-gain.chip,
-.goal-muscle-gain.card-avatar-fallback,
-.goal-muscle-gain.profile-avatar-fallback { background: var(--muscle-gain-bg); color: var(--muscle-gain-fg); }
-.goal-fat-loss.chip,
-.goal-fat-loss.card-avatar-fallback,
-.goal-fat-loss.profile-avatar-fallback { background: var(--fat-loss-bg); color: var(--fat-loss-fg); }
-.goal-strength.chip,
-.goal-strength.card-avatar-fallback,
-.goal-strength.profile-avatar-fallback { background: var(--strength-bg); color: var(--strength-fg); }
-.goal-general-fitness.chip,
-.goal-general-fitness.card-avatar-fallback,
-.goal-general-fitness.profile-avatar-fallback { background: var(--general-fitness-bg); color: var(--general-fitness-fg); }
+.goal-muscle-gain.chip { color: var(--muscle-gain-fg); }
+.goal-fat-loss.chip { color: var(--fat-loss-fg); }
+.goal-strength.chip { color: var(--strength-fg); }
+.goal-general-fitness.chip { color: var(--general-fitness-fg); }
 
-.goal-muscle-gain.card-bar { background: var(--muscle-gain-bar); }
-.goal-fat-loss.card-bar { background: var(--fat-loss-bar); }
-.goal-strength.card-bar { background: var(--strength-bar); }
-.goal-general-fitness.card-bar { background: var(--general-fitness-bar); }
+/* Hazard-tape stripe per goal, alternating with the surface color. */
+.goal-muscle-gain.card-bar { background: repeating-linear-gradient(-45deg, var(--muscle-gain-bar) 0 8px, var(--surface-2) 8px 16px); }
+.goal-fat-loss.card-bar { background: repeating-linear-gradient(-45deg, var(--fat-loss-bar) 0 8px, var(--surface-2) 8px 16px); }
+.goal-strength.card-bar { background: repeating-linear-gradient(-45deg, var(--strength-bar) 0 8px, var(--surface-2) 8px 16px); }
+.goal-general-fitness.card-bar { background: repeating-linear-gradient(-45deg, var(--general-fitness-bar) 0 8px, var(--surface-2) 8px 16px); }
 
 /* ---- profile ------------------------------------------------------------ */
 .profile-head { padding: 4px 0 20px; }
 .profile-avatar {
   display: block;
-  width: 84px; height: 84px;
-  border-radius: 50%;
+  width: 76px; height: 76px;
+  border-radius: var(--radius);
   object-fit: cover;
   margin-bottom: 14px;
-  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
 }
 .profile-avatar-fallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 800;
-  font-size: 32px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 26px;
 }
 .profile-name {
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 800;
-  font-size: 40px;
+  font-family: "Oswald", sans-serif;
+  font-weight: 700;
+  font-size: 36px;
   margin: 0 0 10px;
-  letter-spacing: -.02em;
+  letter-spacing: -.01em;
 }
-.profile-count { color: var(--muted); margin: 12px 0 0; font-size: 14px; }
+.profile-count {
+  color: var(--muted);
+  margin: 12px 0 0;
+  font-size: 13px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
 
 .section-head {
   display: flex;
@@ -240,16 +248,16 @@ html, body {
   margin: 8px 0 14px;
 }
 .section-head h2 {
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 700;
+  font-family: "Oswald", sans-serif;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: .02em;
-  font-size: 18px;
+  letter-spacing: .03em;
+  font-size: 17px;
   margin: 0;
 }
 
 /* ---- history entries ---------------------------------------------------- */
-.history { display: flex; flex-direction: column; gap: 10px; }
+.history { display: flex; flex-direction: column; gap: 1px; }
 
 .entry {
   display: grid;
@@ -258,25 +266,26 @@ html, body {
   align-items: start;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
   padding: 14px 14px 14px 16px;
-  box-shadow: var(--shadow);
 }
 .entry-date {
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 15px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 13px;
   color: var(--muted);
-  line-height: 1.2;
+  line-height: 1.3;
 }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  padding: 4px 9px;
-  border-radius: 8px;
-  background: #eef1f5;
-  color: #3c4552;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  background: var(--surface-2);
+  color: var(--ink);
 }
 .entry-notes { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
 .entry-del {
@@ -286,25 +295,27 @@ html, body {
   font-size: 15px;
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   line-height: 1;
 }
-.entry-del:hover { background: #fdecea; color: var(--danger); }
+.entry-del:hover { background: rgba(199, 59, 44, .15); color: var(--danger); }
 
 /* ---- dialog ------------------------------------------------------------- */
 .dialog {
   width: min(440px, 92vw);
-  border: none;
-  border-radius: 18px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
   padding: 24px;
-  box-shadow: 0 20px 60px rgba(20,24,31,.28);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .6);
 }
-.dialog::backdrop { background: rgba(20,24,31,.45); }
+.dialog::backdrop { background: rgba(0, 0, 0, .7); }
 .dialog h2 {
-  font-family: "Barlow Semi Condensed", sans-serif;
-  font-weight: 800;
+  font-family: "Oswald", sans-serif;
+  font-weight: 700;
   text-transform: uppercase;
-  font-size: 24px;
+  font-size: 22px;
   margin: 0 0 16px;
 }
 .dialog label {
@@ -325,15 +336,16 @@ html, body {
   font-family: inherit;
   color: var(--ink);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #fff;
+  border-radius: var(--radius);
+  background: var(--page);
 }
 .dialog textarea { resize: vertical; }
 .optional { font-weight: 400; color: var(--muted); }
 .photo-preview {
   display: block;
   width: 56px; height: 56px;
-  border-radius: 50%;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
   object-fit: cover;
   margin: 6px 0 8px;
 }
@@ -354,9 +366,11 @@ html, body {
   text-align: center;
   padding: 10px 6px;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .02em;
   color: var(--ink);
   cursor: pointer;
   transition: background .12s ease, border-color .12s ease, color .12s ease;
@@ -364,7 +378,7 @@ html, body {
 .checktag input:checked + span {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: #1c1b1a;
 }
 .checktag input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -384,7 +398,6 @@ html, body {
   padding: 48px 16px;
   background: var(--surface);
   border: 1px dashed var(--line);
-  border-radius: var(--radius);
 }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
