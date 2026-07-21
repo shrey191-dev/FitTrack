@@ -81,6 +81,84 @@ function fileToResizedDataUrl(file, maxDim = 240, quality = 0.82) {
   });
 }
 
+function photoFieldHtml() {
+  return `
+    <div class="photo-field">
+      <span class="field-label">Photo <span class="optional">(optional)</span></span>
+      <div class="photo-drop" tabindex="0" role="button" aria-label="Upload photo, or drag one here">
+        <div class="photo-drop-empty">Click or drop a photo</div>
+        <img class="photo-drop-preview" alt="" hidden />
+        <button type="button" class="photo-remove" hidden aria-label="Remove photo">✕</button>
+      </div>
+      <input name="photo" type="file" accept="image/*" hidden />
+    </div>`;
+}
+
+// Wires up a photoFieldHtml() block: click-to-browse, drag-and-drop, an
+// instant compressed preview, and a remove action. Returns the resolved
+// photo (already compressed at selection time, not re-read at submit).
+function wirePhotoField(container, initialPhoto = null) {
+  const drop = container.querySelector(".photo-drop");
+  const input = container.querySelector('input[name="photo"]');
+  const empty = container.querySelector(".photo-drop-empty");
+  const preview = container.querySelector(".photo-drop-preview");
+  const removeBtn = container.querySelector(".photo-remove");
+
+  let photo = initialPhoto;
+
+  function showPreview(src) {
+    preview.src = src;
+    preview.hidden = false;
+    empty.hidden = true;
+    removeBtn.hidden = false;
+  }
+  function showEmpty() {
+    preview.hidden = true;
+    empty.hidden = false;
+    removeBtn.hidden = true;
+  }
+  if (photo) showPreview(photo); else showEmpty();
+
+  async function handleFile(file) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Please choose an image file");
+      return;
+    }
+    try {
+      photo = await fileToResizedDataUrl(file);
+      showPreview(photo);
+    } catch {
+      showToast("Couldn't read that image");
+    }
+  }
+
+  drop.addEventListener("click", () => input.click());
+  drop.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); }
+  });
+  drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("drag-over"); });
+  drop.addEventListener("dragleave", () => drop.classList.remove("drag-over"));
+  drop.addEventListener("drop", (e) => {
+    e.preventDefault();
+    drop.classList.remove("drag-over");
+    handleFile(e.dataTransfer.files[0]);
+  });
+  input.addEventListener("change", () => handleFile(input.files[0]));
+
+  removeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    photo = null;
+    input.value = "";
+    showEmpty();
+  });
+
+  return {
+    getPhoto: () => photo,
+    reset: () => { photo = null; input.value = ""; showEmpty(); },
+  };
+}
+
 function avatarHtml(client, cssClass) {
   return client.photo
     ? `<img class="${cssClass}" src="${client.photo}" alt="" />`
@@ -128,9 +206,7 @@ export async function renderDashboard() {
             ${GOALS.map((g) => `<option value="${g}">${g}</option>`).join("")}
           </select>
         </label>
-        <label>Photo <span class="optional">(optional)</span>
-          <input name="photo" type="file" accept="image/*" />
-        </label>
+        ${photoFieldHtml()}
         <div class="dialog-actions">
           <button value="cancel" class="btn btn-ghost">Cancel</button>
           <button value="save" class="btn btn-primary">Add client</button>
@@ -143,6 +219,7 @@ export async function renderDashboard() {
   const searchInput = app.querySelector("#searchInput");
   const dialog = app.querySelector("#clientDialog");
   const form = app.querySelector("#clientForm");
+  const clientPhotoField = wirePhotoField(form);
 
   let clients = await getClients();
 
@@ -205,11 +282,10 @@ export async function renderDashboard() {
     const data = new FormData(form);
     const name = data.get("name");
     if (!name.trim()) return;
-    const photoFile = data.get("photo");
-    const photo = photoFile && photoFile.size > 0 ? await fileToResizedDataUrl(photoFile) : null;
-    const created = await addClient({ name, goal: data.get("goal"), photo });
+    const created = await addClient({ name, goal: data.get("goal"), photo: clientPhotoField.getPhoto() });
     clients.push(created);
     form.reset();
+    clientPhotoField.reset();
     paint(searchInput.value);
     showToast(`${created.name} added`);
   });
@@ -308,10 +384,7 @@ export async function renderProfile(id) {
             ${GOALS.map((g) => `<option value="${g}" ${g === client.goal ? "selected" : ""}>${g}</option>`).join("")}
           </select>
         </label>
-        <label>Photo <span class="optional">(optional)</span>
-          ${client.photo ? `<img class="photo-preview" src="${client.photo}" alt="" />` : ""}
-          <input name="photo" type="file" accept="image/*" />
-        </label>
+        ${photoFieldHtml()}
         <div class="dialog-actions">
           <button value="cancel" class="btn btn-ghost">Cancel</button>
           <button value="save" class="btn btn-primary">Save changes</button>
@@ -420,17 +493,14 @@ export async function renderProfile(id) {
   // Edit client
   const editDialog = app.querySelector("#editDialog");
   const editForm = app.querySelector("#editForm");
+  const editPhotoField = wirePhotoField(editForm, client.photo);
   app.querySelector("#editClientBtn").addEventListener("click", () => editDialog.showModal());
   editForm.addEventListener("submit", async (e) => {
     if (e.submitter?.value !== "save") return;
     const data = new FormData(editForm);
     const name = data.get("name");
     if (!name.trim()) return;
-    const patch = { name: name.trim(), goal: data.get("goal") };
-    const photoFile = data.get("photo");
-    if (photoFile && photoFile.size > 0) {
-      patch.photo = await fileToResizedDataUrl(photoFile);
-    }
+    const patch = { name: name.trim(), goal: data.get("goal"), photo: editPhotoField.getPhoto() };
     await updateClient(id, patch);
     await renderProfile(id);
     showToast("Changes saved");
