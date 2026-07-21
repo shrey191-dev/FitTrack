@@ -13,6 +13,9 @@ import {
   GOALS, getClients, getClient, addClient, updateClient, deleteClient,
 } from "./clients.js";
 import { MUSCLE_GROUPS, addWorkout, deleteWorkout } from "./workouts.js";
+import { showToast } from "./toast.js";
+
+const UNDO_WINDOW_MS = 5000;
 
 const app = document.getElementById("app");
 
@@ -79,7 +82,17 @@ function avatarHtml(client, cssClass) {
 // DASHBOARD
 // =============================================================================
 
+function skeletonCards(count) {
+  return Array.from({ length: count }, () => `
+    <div class="card skeleton-card">
+      <div class="skeleton skeleton-line w-60"></div>
+      <div class="skeleton skeleton-line w-40"></div>
+    </div>`).join("");
+}
+
 export async function renderDashboard() {
+  document.title = "FitTrack — Trainer client manager";
+
   app.innerHTML = `
     <header class="topbar">
       <h1 class="brand">Fit<span>Track</span></h1>
@@ -90,9 +103,7 @@ export async function renderDashboard() {
       <input id="searchInput" type="search" placeholder="Search clients" autocomplete="off" />
     </div>
 
-    <section id="clientGrid" class="grid" aria-live="polite">
-      <p class="muted">Loading clients…</p>
-    </section>
+    <section id="clientGrid" class="grid" aria-live="polite">${skeletonCards(6)}</section>
 
     <dialog id="clientDialog" class="dialog">
       <form method="dialog" id="clientForm">
@@ -183,6 +194,7 @@ export async function renderDashboard() {
     clients.push(created);
     form.reset();
     paint(searchInput.value);
+    showToast(`${created.name} added`);
   });
 }
 
@@ -191,10 +203,19 @@ export async function renderDashboard() {
 // =============================================================================
 
 export async function renderProfile(id) {
-  app.innerHTML = `<p class="muted" style="padding:24px">Loading…</p>`;
+  app.innerHTML = `
+    <header class="topbar">
+      <a class="back" href="#/">← Clients</a>
+    </header>
+    <section class="profile-head">
+      <div class="skeleton skeleton-avatar"></div>
+      <div class="skeleton skeleton-line w-40" style="height:28px;"></div>
+      <div class="skeleton skeleton-line w-60" style="margin-top:10px;"></div>
+    </section>`;
   const client = await getClient(id);
 
   if (!client) {
+    document.title = "FitTrack";
     app.innerHTML = `
       <header class="topbar">
         <a class="back" href="#/">← Back</a>
@@ -202,6 +223,8 @@ export async function renderProfile(id) {
       <p class="empty">That client no longer exists.</p>`;
     return;
   }
+
+  document.title = `${client.name} — FitTrack`;
 
   const workouts = [...(client.workouts || [])].sort((a, b) => b.date.localeCompare(a.date));
 
@@ -223,7 +246,10 @@ export async function renderProfile(id) {
 
     <div class="section-head">
       <h2>Workout history</h2>
-      <button class="btn btn-primary" id="addWorkoutBtn">+ Log session</button>
+      <div class="section-actions">
+        <button class="btn btn-ghost" id="exportBtn">Export CSV</button>
+        <button class="btn btn-primary" id="addWorkoutBtn">+ Log session</button>
+      </div>
     </div>
 
     <section id="history" class="history"></section>
@@ -319,23 +345,58 @@ export async function renderProfile(id) {
     workouts.sort((a, b) => b.date.localeCompare(a.date));
     form.reset();
     paintHistory();
+    showToast("Session logged");
   });
 
-  // Delete workout
-  history.addEventListener("click", async (e) => {
+  // Export CSV
+  app.querySelector("#exportBtn").addEventListener("click", () => {
+    const header = "Date,Muscle Groups,Notes\n";
+    const rows = workouts.map((w) => {
+      const groups = (w.groups || []).join("; ");
+      const notes = (w.notes || "").replace(/"/g, '""');
+      return `"${w.date}","${groups}","${notes}"`;
+    });
+    const blob = new Blob([header + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${client.name.replace(/\s+/g, "_")}_sessions.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Delete workout — optimistic, with a few seconds to undo before it's final.
+  history.addEventListener("click", (e) => {
     const btn = e.target.closest(".entry-del");
     if (!btn) return;
     const wid = btn.dataset.id;
-    await deleteWorkout(id, wid);
     const idx = workouts.findIndex((w) => w.id === wid);
-    if (idx > -1) workouts.splice(idx, 1);
+    if (idx === -1) return;
+
+    const [removed] = workouts.splice(idx, 1);
     paintHistory();
+
+    const timer = setTimeout(() => deleteWorkout(id, wid), UNDO_WINDOW_MS);
+    showToast("Session deleted", {
+      actionLabel: "Undo",
+      duration: UNDO_WINDOW_MS,
+      onAction: () => {
+        clearTimeout(timer);
+        workouts.splice(idx, 0, removed);
+        workouts.sort((a, b) => b.date.localeCompare(a.date));
+        paintHistory();
+      },
+    });
   });
 
-  // Delete client
-  app.querySelector("#deleteClientBtn").addEventListener("click", async () => {
-    if (!confirm(`Delete ${client.name} and all their sessions? This can't be undone.`)) return;
-    await deleteClient(id);
+  // Delete client — optimistic, with a few seconds to undo before it's final.
+  app.querySelector("#deleteClientBtn").addEventListener("click", () => {
+    const timer = setTimeout(() => deleteClient(id), UNDO_WINDOW_MS);
+    showToast(`${client.name} deleted`, {
+      actionLabel: "Undo",
+      duration: UNDO_WINDOW_MS,
+      onAction: () => clearTimeout(timer),
+    });
     go("#/");
   });
 
@@ -355,5 +416,6 @@ export async function renderProfile(id) {
     }
     await updateClient(id, patch);
     await renderProfile(id);
+    showToast("Changes saved");
   });
 }

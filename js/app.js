@@ -20,8 +20,14 @@ async function router() {
     }
   } catch (err) {
     console.error("[FitTrack] Render error:", err);
-    document.getElementById("app").innerHTML =
-      `<p class="empty">Something went wrong loading this screen. Check the console.</p>`;
+    const offline = !navigator.onLine;
+    document.getElementById("app").innerHTML = `
+      <p class="empty">
+        ${offline ? "You're offline — check your connection and try again." : "Something went wrong loading this screen. Check the console."}
+        <br />
+        <button class="btn btn-primary" id="retryBtn">Retry</button>
+      </p>`;
+    document.getElementById("retryBtn").addEventListener("click", router);
   }
 }
 
