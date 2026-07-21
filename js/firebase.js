@@ -8,7 +8,9 @@
 // -----------------------------------------------------------------------------
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // TODO: paste your Firebase web config here (Project settings → General → Your apps).
@@ -30,7 +32,12 @@ let db = null;
 let auth = null;
 if (isFirebaseConfigured) {
   const app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
+  // persistentMultipleTabManager lets offline caching work correctly even
+  // with FitTrack open in more than one tab at once (plain single-tab
+  // persistence silently disables itself for every tab but the first).
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+  });
   auth = getAuth(app);
   console.info("[FitTrack] Firestore connected.");
 } else {

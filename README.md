@@ -55,6 +55,18 @@ service cloud.firestore {
 With **no** Firebase config (the localStorage fallback), there's no login gate at
 all — there's no shared backend to protect when data never leaves the browser.
 
+## PWA: install it, use it offline
+
+FitTrack is installable on both Android and iOS:
+- **Android (Chrome)**: an install prompt appears automatically, or use the menu → "Install FitTrack."
+- **iOS (Safari)**: Share → Add to Home Screen (no auto-prompt on iOS).
+
+Once installed it opens full-screen with its own icon. `sw.js` caches the app
+shell so it still opens with no signal, and Firestore's persistent local cache
+(`persistentLocalCache` + `persistentMultipleTabManager` in `js/firebase.js`)
+means clients and sessions are readable — and writable, auto-syncing once back
+online — even offline, correctly even with FitTrack open in more than one tab.
+
 ## Structure
 
 ```
@@ -70,7 +82,9 @@ FitTrack/
 │   ├── workouts.js     # workout operations (embedded in the client doc)
 │   ├── dashboard.js    # view layer: dashboard + profile rendering & events
 │   └── toast.js        # toast/snackbar utility (used for undo-delete + confirmations)
-├── assets/favicon.svg
+├── sw.js               # service worker: caches the app shell for offline use
+├── manifest.webmanifest
+├── assets/              # favicon.svg, icon-192.png, icon-512.png, apple-touch-icon.png
 └── README.md
 ```
 
@@ -105,4 +119,4 @@ either grows past a screenful.
   data URL on the client doc, no Firebase Storage needed), ~~Firebase Auth~~ (done —
   sign-in-only gate, no public sign-up), attendance %, calendar view
 - **v3** — progress photos, weight & measurements, nutrition notes, PDF export
-- **v4** — PWA: installable, offline support, push notifications
+- **v4** — ~~PWA: installable, offline support~~ (done — see above), push notifications
