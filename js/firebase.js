@@ -9,6 +9,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // TODO: paste your Firebase web config here (Project settings → General → Your apps).
 // The web config is NOT secret — it's fine to commit. Just don't commit service-account keys.
@@ -26,12 +27,14 @@ const firebaseConfig = {
 export const isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
 
 let db = null;
+let auth = null;
 if (isFirebaseConfigured) {
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  auth = getAuth(app);
   console.info("[FitTrack] Firestore connected.");
 } else {
   console.info("[FitTrack] Firebase not configured — using localStorage.");
 }
 
-export { db };
+export { db, auth };

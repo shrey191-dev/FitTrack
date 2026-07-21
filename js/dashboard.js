@@ -14,6 +14,8 @@ import {
 } from "./clients.js";
 import { MUSCLE_GROUPS, addWorkout, deleteWorkout } from "./workouts.js";
 import { showToast } from "./toast.js";
+import { isFirebaseConfigured } from "./firebase.js";
+import { signOutUser } from "./auth.js";
 
 const UNDO_WINDOW_MS = 5000;
 
@@ -96,7 +98,10 @@ export async function renderDashboard() {
   app.innerHTML = `
     <header class="topbar">
       <h1 class="brand">Fit<span>Track</span></h1>
-      <button class="btn btn-primary" id="addClientBtn">+ Add client</button>
+      <div class="topbar-actions">
+        ${isFirebaseConfigured ? '<button class="btn btn-ghost" id="signOutBtn">Sign out</button>' : ""}
+        <button class="btn btn-primary" id="addClientBtn">+ Add client</button>
+      </div>
     </header>
 
     <div class="search">
@@ -179,6 +184,11 @@ export async function renderDashboard() {
       if (card) { e.preventDefault(); go(`#/client/${card.dataset.id}`); }
     }
   });
+
+  // Sign out
+  if (isFirebaseConfigured) {
+    app.querySelector("#signOutBtn").addEventListener("click", () => signOutUser());
+  }
 
   // Add client
   app.querySelector("#addClientBtn").addEventListener("click", () => dialog.showModal());

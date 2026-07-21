@@ -4,11 +4,25 @@
 //   #/                 → dashboard
 //   #/client/<id>      → client profile
 // Hash routing needs no server config and works on Firebase Hosting as-is.
+//
+// Auth gate: watchAuth reports whether a login is required at all (only true
+// once Firebase is configured) and the current user. Every reactive auth
+// change re-runs the router, so signing in/out immediately shows the right
+// screen with no manual redirect.
 // -----------------------------------------------------------------------------
 
 import { renderDashboard, renderProfile } from "./dashboard.js";
+import { watchAuth } from "./auth.js";
+import { renderLogin } from "./login.js";
+
+let authState = { required: false, user: null };
 
 async function router() {
+  if (authState.required && !authState.user) {
+    renderLogin();
+    return;
+  }
+
   const hash = location.hash || "#/";
   const clientMatch = hash.match(/^#\/client\/(.+)$/);
 
@@ -32,4 +46,7 @@ async function router() {
 }
 
 window.addEventListener("hashchange", router);
-window.addEventListener("DOMContentLoaded", router);
+watchAuth((state) => {
+  authState = state;
+  router();
+});

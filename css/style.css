@@ -470,6 +470,53 @@ html, body {
 .skeleton-line.w-60 { width: 60%; }
 .skeleton-line.w-40 { width: 40%; }
 
+/* ---- login ------------------------------------------------------------------ */
+.login-shell {
+  max-width: 360px;
+  margin: 18vh auto 0;
+  padding: 0 16px;
+  text-align: center;
+}
+.login-shell .brand { margin-bottom: 28px; }
+.login-form {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 24px;
+  text-align: left;
+}
+.login-form h2 {
+  font-family: "Oswald", sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 20px;
+  margin: 0 0 18px;
+}
+.login-form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.login-form input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 11px 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--page);
+}
+.login-form .btn { width: 100%; padding: 12px; }
+.login-error {
+  color: var(--danger);
+  font-size: 13px;
+  margin: -4px 0 14px;
+}
+
 /* ---- footer --------------------------------------------------------------- */
 .site-footer {
   max-width: 720px;

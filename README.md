@@ -31,15 +31,29 @@ localStorage** — you can add clients and log sessions right away.
 3. Reload. The console logs `Firestore connected` and the app now reads/writes the
    `clients` collection. Nothing else changes — the UI is backend-agnostic.
 
-### ⚠️ Firestore rules
-Your current dev rules allow open read/write:
+### Auth + Firestore rules
+Once Firebase is configured, the app requires sign-in (`js/auth.js`, `js/login.js`)
+before rendering anything — there is deliberately **no public sign-up screen**,
+since this is a single-trainer tool. Create the one trainer account yourself in
+Firebase Console → Authentication → Users → *Add user* (any email-shaped string
+works as a "username," e.g. `you@fittrack.local`), and enable the **Email/Password**
+sign-in method.
+
+Firestore rules should require that login:
 
 ```
-allow read, write: if true;
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
 ```
 
-That is fine for local development only. **Lock this down before deploying** —
-add Firebase Authentication (see roadmap) and scope rules to the signed-in trainer.
+With **no** Firebase config (the localStorage fallback), there's no login gate at
+all — there's no shared backend to protect when data never leaves the browser.
 
 ## Structure
 
@@ -48,12 +62,15 @@ FitTrack/
 ├── index.html          # app shell
 ├── css/style.css       # all styling
 ├── js/
-│   ├── app.js          # entry point + hash router
+│   ├── app.js          # entry point + hash router + auth gate
 │   ├── firebase.js     # Firebase init + config (localStorage fallback flag)
+│   ├── auth.js         # Firebase Auth wrapper (sign in / out, watch state)
+│   ├── login.js        # sign-in screen (shown when auth is required)
 │   ├── clients.js      # client repository (the only file that knows the backend)
 │   ├── workouts.js     # workout operations (embedded in the client doc)
-│   └── dashboard.js    # view layer: dashboard + profile rendering & events
-├── assets/images/
+│   ├── dashboard.js    # view layer: dashboard + profile rendering & events
+│   └── toast.js        # toast/snackbar utility (used for undo-delete + confirmations)
+├── assets/favicon.svg
 └── README.md
 ```
 
@@ -84,8 +101,8 @@ either grows past a screenful.
 
 ## Roadmap
 
-- **v2** — ~~client photos~~, ~~edit client~~ (done — photo is stored as a resized JPEG
-  data URL on the client doc, no Firebase Storage needed), Firebase Auth, attendance %,
-  calendar view
+- **v2** — ~~client photos~~, ~~edit client~~ (photo is stored as a resized JPEG
+  data URL on the client doc, no Firebase Storage needed), ~~Firebase Auth~~ (done —
+  sign-in-only gate, no public sign-up), attendance %, calendar view
 - **v3** — progress photos, weight & measurements, nutrition notes, PDF export
 - **v4** — PWA: installable, offline support, push notifications
