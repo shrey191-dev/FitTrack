@@ -37,7 +37,14 @@ function formatDate(iso) {
 }
 
 function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  // toISOString() reports UTC, not local time — near midnight that silently
+  // returns yesterday's date for anyone ahead of UTC, which then blocks
+  // logging a session on the actual current day via the date input's max.
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function go(hash) {
