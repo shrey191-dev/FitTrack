@@ -230,6 +230,9 @@ export async function renderDashboard() {
             ${GOALS.map((g) => `<option value="${g}">${g}</option>`).join("")}
           </select>
         </label>
+        <label>Injuries <span class="optional">(optional)</span>
+          <textarea name="injuries" rows="2" maxlength="200" placeholder="e.g. Lower back — avoid heavy deadlifts"></textarea>
+        </label>
         ${photoFieldHtml()}
         <div class="dialog-actions">
           <button value="cancel" class="btn btn-ghost">Cancel</button>
@@ -265,9 +268,10 @@ export async function renderDashboard() {
 
     grid.innerHTML = list.map((c) => `
         <article class="card" data-id="${c.id}" tabindex="0" role="button"
-                 aria-label="Open ${esc(c.name)}">
+                 aria-label="Open ${esc(c.name)}${c.injuries ? ", has injury notes" : ""}">
           <span class="card-bar goal-${goalSlug(c.goal)}"></span>
           ${avatarHtml(c, "card-avatar")}
+          ${c.injuries ? `<span class="card-injury" title="${esc(c.injuries)}">!</span>` : ""}
           <h3 class="card-name">${esc(c.name)}</h3>
           <span class="chip goal-${goalSlug(c.goal)}">${esc(c.goal)}</span>
           <div class="card-latest">${latestWorkoutTagsHtml(c)}</div>
@@ -304,7 +308,9 @@ export async function renderDashboard() {
     const data = new FormData(form);
     const name = data.get("name");
     if (!name.trim()) return;
-    await addClient({ name, goal: data.get("goal"), photo: clientPhotoField.getPhoto() });
+    await addClient({
+      name, goal: data.get("goal"), photo: clientPhotoField.getPhoto(), injuries: data.get("injuries"),
+    });
     location.reload();
   });
 }
@@ -353,6 +359,7 @@ export async function renderProfile(id) {
       <h1 class="profile-name">${esc(client.name)}</h1>
       <span class="chip goal-${goalSlug(client.goal)}">${esc(client.goal)}</span>
       <p class="profile-count">${workouts.length} recorded ${workouts.length === 1 ? "session" : "sessions"}</p>
+      ${client.injuries ? `<p class="profile-injury">! ${esc(client.injuries)}</p>` : ""}
     </section>
 
     <div class="section-head">
@@ -411,6 +418,9 @@ export async function renderProfile(id) {
           <select name="goal" required>
             ${GOALS.map((g) => `<option value="${g}" ${g === client.goal ? "selected" : ""}>${g}</option>`).join("")}
           </select>
+        </label>
+        <label>Injuries <span class="optional">(optional)</span>
+          <textarea name="injuries" rows="2" maxlength="200" placeholder="e.g. Lower back — avoid heavy deadlifts">${esc(client.injuries || "")}</textarea>
         </label>
         ${photoFieldHtml()}
         <div class="dialog-actions">
@@ -531,7 +541,12 @@ export async function renderProfile(id) {
     const data = new FormData(editForm);
     const name = data.get("name");
     if (!name.trim()) return;
-    const patch = { name: name.trim(), goal: data.get("goal"), photo: editPhotoField.getPhoto() };
+    const patch = {
+      name: name.trim(),
+      goal: data.get("goal"),
+      photo: editPhotoField.getPhoto(),
+      injuries: data.get("injuries").trim() || null,
+    };
     await updateClient(id, patch);
     await renderProfile(id);
     showToast("Changes saved");

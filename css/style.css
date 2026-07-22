@@ -159,6 +159,24 @@ html, body {
   font-weight: 600;
   font-size: 13px;
 }
+/* Small badge on the avatar's corner when a client has injury notes —
+   deliberately tiny and self-contained so it never reflows card layout. */
+.card-injury {
+  position: absolute;
+  top: 44px; right: 12px;
+  width: 16px; height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--danger);
+  color: #fff;
+  border: 2px solid var(--surface);
+  border-radius: 2px;
+  font-family: "Oswald", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+}
 .card-name {
   font-family: "Oswald", sans-serif;
   font-weight: 600;
@@ -236,6 +254,15 @@ html, body {
   font-size: 13px;
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
+}
+.profile-injury {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .section-head {

@@ -5,7 +5,8 @@
 // or localStorage directly. Swap the backend here and nothing else needs to know.
 //
 // Client shape:
-//   { id, name, goal, photo: dataUrl|null, workouts: [ { id, date, groups: [], notes } ] }
+//   { id, name, goal, photo: dataUrl|null, injuries: string|null,
+//     workouts: [ { id, date, groups: [], notes } ] }
 // -----------------------------------------------------------------------------
 
 import { db, isFirebaseConfigured } from "./firebase.js";
@@ -42,7 +43,7 @@ function newId() {
 export async function getClients() {
   if (isFirebaseConfigured) {
     const snap = await getDocs(collection(db, COLLECTION));
-    return snap.docs.map((d) => ({ id: d.id, workouts: [], photo: null, ...d.data() }));
+    return snap.docs.map((d) => ({ id: d.id, workouts: [], photo: null, injuries: null, ...d.data() }));
   }
   return lsReadAll();
 }
@@ -50,13 +51,15 @@ export async function getClients() {
 export async function getClient(id) {
   if (isFirebaseConfigured) {
     const snap = await getDoc(doc(db, COLLECTION, id));
-    return snap.exists() ? { id: snap.id, workouts: [], photo: null, ...snap.data() } : null;
+    return snap.exists() ? { id: snap.id, workouts: [], photo: null, injuries: null, ...snap.data() } : null;
   }
   return lsReadAll().find((c) => c.id === id) || null;
 }
 
-export async function addClient({ name, goal, photo }) {
-  const client = { name: name.trim(), goal, photo: photo || null, workouts: [] };
+export async function addClient({ name, goal, photo, injuries }) {
+  const client = {
+    name: name.trim(), goal, photo: photo || null, injuries: (injuries || "").trim() || null, workouts: [],
+  };
 
   if (isFirebaseConfigured) {
     const ref = await addDoc(collection(db, COLLECTION), client);
