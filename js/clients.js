@@ -6,6 +6,7 @@
 //
 // Client shape:
 //   { id, name, goal, photo: dataUrl|null, injuries: string|null,
+//     startDate: "YYYY-MM-DD"|null, endDate: "YYYY-MM-DD"|null,
 //     workouts: [ { id, date, groups: [], notes } ] }
 // -----------------------------------------------------------------------------
 
@@ -40,10 +41,14 @@ function newId() {
 // --- Public API --------------------------------------------------------------
 
 // Return every client, newest activity first isn't tracked yet, so keep insertion order.
+const CLIENT_DEFAULTS = {
+  workouts: [], photo: null, injuries: null, startDate: null, endDate: null,
+};
+
 export async function getClients() {
   if (isFirebaseConfigured) {
     const snap = await getDocs(collection(db, COLLECTION));
-    return snap.docs.map((d) => ({ id: d.id, workouts: [], photo: null, injuries: null, ...d.data() }));
+    return snap.docs.map((d) => ({ id: d.id, ...CLIENT_DEFAULTS, ...d.data() }));
   }
   return lsReadAll();
 }
@@ -51,14 +56,20 @@ export async function getClients() {
 export async function getClient(id) {
   if (isFirebaseConfigured) {
     const snap = await getDoc(doc(db, COLLECTION, id));
-    return snap.exists() ? { id: snap.id, workouts: [], photo: null, injuries: null, ...snap.data() } : null;
+    return snap.exists() ? { id: snap.id, ...CLIENT_DEFAULTS, ...snap.data() } : null;
   }
   return lsReadAll().find((c) => c.id === id) || null;
 }
 
-export async function addClient({ name, goal, photo, injuries }) {
+export async function addClient({ name, goal, photo, injuries, startDate, endDate }) {
   const client = {
-    name: name.trim(), goal, photo: photo || null, injuries: (injuries || "").trim() || null, workouts: [],
+    name: name.trim(),
+    goal,
+    photo: photo || null,
+    injuries: (injuries || "").trim() || null,
+    startDate: startDate || null,
+    endDate: endDate || null,
+    workouts: [],
   };
 
   if (isFirebaseConfigured) {

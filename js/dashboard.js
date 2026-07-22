@@ -230,6 +230,14 @@ export async function renderDashboard() {
             ${GOALS.map((g) => `<option value="${g}">${g}</option>`).join("")}
           </select>
         </label>
+        <div class="field-row">
+          <label>Start date <span class="optional">(optional)</span>
+            <input name="startDate" type="date" />
+          </label>
+          <label>End date <span class="optional">(optional)</span>
+            <input name="endDate" type="date" />
+          </label>
+        </div>
         <label>Injuries <span class="optional">(optional)</span>
           <textarea name="injuries" rows="2" maxlength="200" placeholder="e.g. Lower back — avoid heavy deadlifts"></textarea>
         </label>
@@ -309,7 +317,12 @@ export async function renderDashboard() {
     const name = data.get("name");
     if (!name.trim()) return;
     await addClient({
-      name, goal: data.get("goal"), photo: clientPhotoField.getPhoto(), injuries: data.get("injuries"),
+      name,
+      goal: data.get("goal"),
+      photo: clientPhotoField.getPhoto(),
+      injuries: data.get("injuries"),
+      startDate: data.get("startDate"),
+      endDate: data.get("endDate"),
     });
     location.reload();
   });
@@ -355,7 +368,14 @@ export async function renderProfile(id) {
     </header>
 
     <section class="profile-head">
-      ${avatarHtml(client, "profile-avatar")}
+      <div class="profile-top">
+        ${avatarHtml(client, "profile-avatar")}
+        ${(client.startDate || client.endDate) ? `
+        <div class="profile-dates">
+          ${client.startDate ? `<p><span class="label">Start</span> ${formatDate(client.startDate)}</p>` : ""}
+          ${client.endDate ? `<p><span class="label">End</span> ${formatDate(client.endDate)}</p>` : ""}
+        </div>` : ""}
+      </div>
       <h1 class="profile-name">${esc(client.name)}</h1>
       <span class="chip goal-${goalSlug(client.goal)}">${esc(client.goal)}</span>
       <p class="profile-count">${workouts.length} recorded ${workouts.length === 1 ? "session" : "sessions"}</p>
@@ -419,6 +439,14 @@ export async function renderProfile(id) {
             ${GOALS.map((g) => `<option value="${g}" ${g === client.goal ? "selected" : ""}>${g}</option>`).join("")}
           </select>
         </label>
+        <div class="field-row">
+          <label>Start date <span class="optional">(optional)</span>
+            <input name="startDate" type="date" value="${client.startDate || ""}" />
+          </label>
+          <label>End date <span class="optional">(optional)</span>
+            <input name="endDate" type="date" value="${client.endDate || ""}" />
+          </label>
+        </div>
         <label>Injuries <span class="optional">(optional)</span>
           <textarea name="injuries" rows="2" maxlength="200" placeholder="e.g. Lower back — avoid heavy deadlifts">${esc(client.injuries || "")}</textarea>
         </label>
@@ -546,6 +574,8 @@ export async function renderProfile(id) {
       goal: data.get("goal"),
       photo: editPhotoField.getPhoto(),
       injuries: data.get("injuries").trim() || null,
+      startDate: data.get("startDate") || null,
+      endDate: data.get("endDate") || null,
     };
     await updateClient(id, patch);
     await renderProfile(id);
