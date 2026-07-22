@@ -12,7 +12,7 @@
 import {
   GOALS, getClients, getClient, addClient, updateClient, deleteClient,
 } from "./clients.js";
-import { MUSCLE_GROUPS, addWorkout, deleteWorkout } from "./workouts.js";
+import { MUSCLE_GROUPS, CARDIO_TYPES, addWorkout, deleteWorkout } from "./workouts.js";
 import { showToast } from "./toast.js";
 import { isFirebaseConfigured } from "./firebase.js";
 import { signOutUser } from "./auth.js";
@@ -367,6 +367,16 @@ export async function renderProfile(id) {
               </label>`).join("")}
           </div>
         </fieldset>
+        <fieldset class="groups groups-cardio">
+          <legend>Cardio <span class="optional">(optional)</span></legend>
+          <div class="group-grid">
+            ${CARDIO_TYPES.map((c) => `
+              <label class="checktag checktag-cardio">
+                <input type="checkbox" name="cardio" value="${c}" />
+                <span>${c}</span>
+              </label>`).join("")}
+          </div>
+        </fieldset>
         <label>Notes <span class="optional">(optional)</span>
           <textarea name="notes" rows="2" maxlength="280" placeholder="How did it go?"></textarea>
         </label>
@@ -413,9 +423,9 @@ export async function renderProfile(id) {
       <article class="entry" data-id="${w.id}">
         <div class="entry-date">${formatDate(w.date)}</div>
         <div class="entry-body">
-          <div class="tags">
-            ${(w.groups || []).map((g) => `<span class="tag">${esc(g)}</span>`).join("") || `<span class="muted">No groups</span>`}
-          </div>
+          ${(w.groups || []).length ? `<div class="tags">${w.groups.map((g) => `<span class="tag">${esc(g)}</span>`).join("")}</div>` : ""}
+          ${(w.cardio || []).length ? `<div class="tags tags-cardio">${w.cardio.map((c) => `<span class="tag tag-cardio">${esc(c)}</span>`).join("")}</div>` : ""}
+          ${!(w.groups || []).length && !(w.cardio || []).length ? `<span class="muted">No activity logged</span>` : ""}
           ${w.notes ? `<p class="entry-notes">${esc(w.notes)}</p>` : ""}
         </div>
         <button class="entry-del" data-id="${w.id}" aria-label="Delete session">✕</button>
@@ -430,9 +440,11 @@ export async function renderProfile(id) {
     if (e.submitter?.value !== "save") return;
     const data = new FormData(form);
     const groups = data.getAll("groups");
+    const cardio = data.getAll("cardio");
     const saved = await addWorkout(id, {
       date: data.get("date"),
       groups,
+      cardio,
       notes: data.get("notes"),
     });
     workouts.push(saved);
@@ -444,11 +456,12 @@ export async function renderProfile(id) {
 
   // Export CSV
   app.querySelector("#exportBtn").addEventListener("click", () => {
-    const header = "Date,Muscle Groups,Notes\n";
+    const header = "Date,Muscle Groups,Cardio,Notes\n";
     const rows = workouts.map((w) => {
       const groups = (w.groups || []).join("; ");
+      const cardio = (w.cardio || []).join("; ");
       const notes = (w.notes || "").replace(/"/g, '""');
-      return `"${w.date}","${groups}","${notes}"`;
+      return `"${w.date}","${groups}","${cardio}","${notes}"`;
     });
     const blob = new Blob([header + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);

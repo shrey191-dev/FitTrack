@@ -5,7 +5,8 @@
 // through the client repository. Keeping this separate from clients.js keeps
 // the "what a workout is" logic in one place.
 //
-// Workout shape: { id, date: "YYYY-MM-DD", groups: [String], notes: String }
+// Workout shape:
+//   { id, date: "YYYY-MM-DD", groups: [String], cardio: [String], notes: String }
 // -----------------------------------------------------------------------------
 
 import { getClient, updateClient } from "./clients.js";
@@ -13,6 +14,10 @@ import { getClient, updateClient } from "./clients.js";
 export const MUSCLE_GROUPS = [
   "Chest", "Triceps", "Back", "Biceps",
   "Shoulders", "Legs", "Abs", "CrossFit",
+];
+
+export const CARDIO_TYPES = [
+  "Treadmill", "Cross Trainer", "Airbike", "Cycle", "Electric Bike", "Rowing",
 ];
 
 function newId() {
@@ -24,7 +29,7 @@ function byDateDesc(a, b) {
   return b.date.localeCompare(a.date);
 }
 
-export async function addWorkout(clientId, { date, groups, notes }) {
+export async function addWorkout(clientId, { date, groups, cardio, notes }) {
   const client = await getClient(clientId);
   if (!client) throw new Error("Client not found");
 
@@ -32,6 +37,7 @@ export async function addWorkout(clientId, { date, groups, notes }) {
     id: newId(),
     date,
     groups,
+    cardio,
     notes: (notes || "").trim(),
   };
 
