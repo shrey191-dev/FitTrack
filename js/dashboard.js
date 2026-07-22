@@ -243,7 +243,7 @@ export async function renderDashboard() {
         </label>
         ${photoFieldHtml()}
         <div class="dialog-actions">
-          <button value="cancel" class="btn btn-ghost">Cancel</button>
+          <button value="cancel" formnovalidate class="btn btn-ghost">Cancel</button>
           <button value="save" class="btn btn-primary">Add client</button>
         </div>
       </form>
@@ -422,7 +422,7 @@ export async function renderProfile(id) {
           <textarea name="notes" rows="2" maxlength="280" placeholder="How did it go?"></textarea>
         </label>
         <div class="dialog-actions">
-          <button value="cancel" class="btn btn-ghost">Cancel</button>
+          <button value="cancel" formnovalidate class="btn btn-ghost">Cancel</button>
           <button value="save" class="btn btn-primary">Save session</button>
         </div>
       </form>
@@ -452,7 +452,7 @@ export async function renderProfile(id) {
         </label>
         ${photoFieldHtml()}
         <div class="dialog-actions">
-          <button value="cancel" class="btn btn-ghost">Cancel</button>
+          <button value="cancel" formnovalidate class="btn btn-ghost">Cancel</button>
           <button value="save" class="btn btn-primary">Save changes</button>
         </div>
       </form>
