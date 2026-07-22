@@ -56,11 +56,28 @@ function initials(name) {
     .map((w) => w[0].toUpperCase()).join("");
 }
 
-// Most recent session date for a client, "" if they have none — ISO date
-// strings compare lexicographically, so this sorts correctly as plain text.
+// The most recently dated session for a client, or null if they have none.
+function getLatestWorkout(client) {
+  const workouts = client.workouts || [];
+  return workouts.length
+    ? workouts.reduce((latest, w) => (w.date > latest.date ? w : latest))
+    : null;
+}
+
+// "" (sorts last) if a client has no sessions — ISO date strings compare
+// lexicographically, so this sorts correctly as plain text.
 function latestActivity(client) {
-  const dates = (client.workouts || []).map((w) => w.date);
-  return dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : "";
+  return getLatestWorkout(client)?.date || "";
+}
+
+function latestWorkoutTagsHtml(client) {
+  const latest = getLatestWorkout(client);
+  if (!latest) return `<span class="muted">No sessions yet</span>`;
+  const tags = [
+    ...(latest.groups || []).map((g) => `<span class="tag">${esc(g)}</span>`),
+    ...(latest.cardio || []).map((c) => `<span class="tag tag-cardio">${esc(c)}</span>`),
+  ].join("");
+  return tags || `<span class="muted">No activity logged</span>`;
 }
 
 // Downscale + JPEG-compress so a photo fits comfortably under Firestore's 1MB
@@ -246,18 +263,15 @@ export async function renderDashboard() {
       return;
     }
 
-    grid.innerHTML = list.map((c) => {
-      const sessions = (c.workouts || []).length;
-      return `
+    grid.innerHTML = list.map((c) => `
         <article class="card" data-id="${c.id}" tabindex="0" role="button"
                  aria-label="Open ${esc(c.name)}">
           <span class="card-bar goal-${goalSlug(c.goal)}"></span>
           ${avatarHtml(c, "card-avatar")}
           <h3 class="card-name">${esc(c.name)}</h3>
           <span class="chip goal-${goalSlug(c.goal)}">${esc(c.goal)}</span>
-          <p class="card-sessions"><strong>${String(sessions).padStart(2, "0")}</strong> ${sessions === 1 ? "session" : "sessions"} logged</p>
-        </article>`;
-    }).join("");
+          <div class="card-latest">${latestWorkoutTagsHtml(c)}</div>
+        </article>`).join("");
   }
 
   paint();

@@ -167,21 +167,16 @@ html, body {
   padding-right: 42px;
   letter-spacing: -.005em;
 }
-.card-sessions {
+.card-latest {
   margin: 14px 0 0;
   padding-top: 12px;
   border-top: 1px dashed var(--line);
-  color: var(--muted);
-  font-size: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 22px;
 }
-.card-sessions strong {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  font-size: 21px;
-  color: var(--ink);
-  margin-right: 5px;
-}
+.card-latest .muted { font-size: 12px; }
 
 /* ---- goal tags (bracket style, no fill) ---------------------------------- */
 .chip {
