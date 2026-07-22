@@ -56,6 +56,13 @@ function initials(name) {
     .map((w) => w[0].toUpperCase()).join("");
 }
 
+// Most recent session date for a client, "" if they have none — ISO date
+// strings compare lexicographically, so this sorts correctly as plain text.
+function latestActivity(client) {
+  const dates = (client.workouts || []).map((w) => w.date);
+  return dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : "";
+}
+
 // Downscale + JPEG-compress so a photo fits comfortably under Firestore's 1MB
 // document limit and stays cheap in localStorage too.
 function fileToResizedDataUrl(file, maxDim = 240, quality = 0.82) {
@@ -222,6 +229,7 @@ export async function renderDashboard() {
   const clientPhotoField = wirePhotoField(form);
 
   let clients = await getClients();
+  clients.sort((a, b) => latestActivity(b).localeCompare(latestActivity(a)));
 
   function paint(filter = "") {
     const q = filter.trim().toLowerCase();
@@ -282,12 +290,8 @@ export async function renderDashboard() {
     const data = new FormData(form);
     const name = data.get("name");
     if (!name.trim()) return;
-    const created = await addClient({ name, goal: data.get("goal"), photo: clientPhotoField.getPhoto() });
-    clients.push(created);
-    form.reset();
-    clientPhotoField.reset();
-    paint(searchInput.value);
-    showToast(`${created.name} added`);
+    await addClient({ name, goal: data.get("goal"), photo: clientPhotoField.getPhoto() });
+    location.reload();
   });
 }
 
