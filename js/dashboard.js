@@ -81,10 +81,12 @@ function latestWorkoutTagsHtml(client) {
 }
 
 // Downscale + JPEG-compress so a photo fits comfortably under Firestore's 1MB
-// document limit and stays cheap in localStorage too. 480px/0.88 lands around
-// 30-80KB — plenty of headroom under that limit, and sharp enough for the
-// profile avatar (76 CSS px, but 150-230 physical px on a 2-3x DPI phone).
-function fileToResizedDataUrl(file, maxDim = 480, quality = 0.88) {
+// document limit and stays cheap in localStorage too. 640px/0.92 lands around
+// 60-150KB — comfortably covers the profile avatar (76 CSS px, up to ~230
+// physical px on a 3x DPI phone) with room to spare under that limit. Going
+// much higher has little visible payoff until the app has a full-screen
+// photo viewer — right now the avatar is the largest thing it's ever shown at.
+function fileToResizedDataUrl(file, maxDim = 640, quality = 0.92) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(reader.error);
