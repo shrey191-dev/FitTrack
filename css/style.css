@@ -193,6 +193,11 @@ body {
   margin: 0 0 10px;
   padding-right: 42px;
   letter-spacing: -.005em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
 }
 .card-latest {
   margin: 14px 0 0;
