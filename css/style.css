@@ -588,6 +588,17 @@ body {
   50% { opacity: .9; }
 }
 .skeleton { background: var(--surface-2); animation: pulse 1.4s ease-in-out infinite; }
+
+/* Static splash shown straight from index.html, before app.js has even run —
+   replaced the instant the first real screen renders (every render* function
+   does a full innerHTML swap of #app), so there's no blank flash on load. */
+.splash {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.splash .brand { animation: pulse 1.4s ease-in-out infinite; }
 .skeleton-card { height: 118px; }
 .skeleton-avatar { width: 76px; height: 76px; border-radius: var(--radius); margin-bottom: 14px; }
 .skeleton-line { height: 14px; border-radius: 2px; margin-bottom: 10px; }
