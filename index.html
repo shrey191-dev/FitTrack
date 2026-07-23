@@ -23,6 +23,26 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Inlined so the splash paints instantly, with zero wait on style.css or
+       Google Fonts to download first — those can arrive whenever, this can't. -->
+  <style>
+    html, body { margin: 0; background: #1c1b1a; color: #eeeae2; font-family: system-ui, sans-serif; }
+    .splash { min-height: 60vh; display: flex; align-items: center; justify-content: center; }
+    .splash h1 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 28px;
+      letter-spacing: -.01em;
+      text-transform: uppercase;
+      animation: splash-pulse 1.4s ease-in-out infinite;
+    }
+    .splash h1 span { color: #ff5a1f; }
+    @keyframes splash-pulse { 0%, 100% { opacity: .5; } 50% { opacity: .9; } }
+    @media (prefers-reduced-motion: reduce) {
+      .splash h1 { animation: none; }
+    }
+  </style>
 </head>
 <body>
   <main id="app" class="app">
