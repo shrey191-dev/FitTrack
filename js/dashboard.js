@@ -490,23 +490,22 @@ export async function renderProfile(id) {
 
   paintHistory();
 
-  // Add workout
+  // Add workout — re-fetch the whole profile from source afterward (instead
+  // of just patching the in-memory array) so the dashboard's "latest
+  // activity" sort/tags are guaranteed correct the moment you navigate back.
   app.querySelector("#addWorkoutBtn").addEventListener("click", () => dialog.showModal());
   form.addEventListener("submit", async (e) => {
     if (e.submitter?.value !== "save") return;
     const data = new FormData(form);
     const groups = data.getAll("groups");
     const cardio = data.getAll("cardio");
-    const saved = await addWorkout(id, {
+    await addWorkout(id, {
       date: data.get("date"),
       groups,
       cardio,
       notes: data.get("notes"),
     });
-    workouts.push(saved);
-    workouts.sort((a, b) => b.date.localeCompare(a.date));
-    form.reset();
-    paintHistory();
+    await renderProfile(id);
     showToast("Session logged");
   });
 
@@ -554,7 +553,14 @@ export async function renderProfile(id) {
 
   // Delete client — optimistic, with a few seconds to undo before it's final.
   app.querySelector("#deleteClientBtn").addEventListener("click", () => {
-    const timer = setTimeout(() => deleteClient(id), UNDO_WINDOW_MS);
+    // The dashboard we're about to navigate to is fetched immediately, well
+    // before this delayed delete actually happens — so it still shows this
+    // client. Reload once the delete really goes through so that card
+    // doesn't linger indefinitely after the undo window passes.
+    const timer = setTimeout(async () => {
+      await deleteClient(id);
+      location.reload();
+    }, UNDO_WINDOW_MS);
     showToast(`${client.name} deleted`, {
       actionLabel: "Undo",
       duration: UNDO_WINDOW_MS,
